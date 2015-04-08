@@ -1,4 +1,5 @@
 {
+  "name": "og-node",
   "description": "Open graph parser with custom fallbacks.",
   "main": "lib/index.js",
   "license": "BSD",

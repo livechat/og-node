@@ -13,6 +13,7 @@ class OpenGraph
 			followAllRedirects: false
 			maxRedirects: 3
 			timeout: 15 * 1000
+			gzip: true
 			headers:
 				'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.104 Safari/537.36"
 			pool:
@@ -44,13 +45,28 @@ class OpenGraph
 		return null
 
 	getMetaFromUrl: (url, callback) =>
-		request.get _.extend({url: url}, @options), (err, res, body) =>
+		callback = _.once callback
+
+		theRequest = request.get _.extend({url: url}, @options), (err, res, body) =>
+			theRequest.removeAllListeners 'response'
 			if err then return callback err
 
 			if Buffer.isBuffer body
 				@getMetaFromBuffer body, res, callback
 			else
 				@getMetaFromHtml body, res, callback
+
+		theRequest.once 'response', openGraphResponseHandler = (res) ->
+			contentDisposition = res.headers['content-disposition']
+			contentLength = res.headers['content-length']
+
+			if contentDisposition and /^attachment/.test contentDisposition
+				theRequest.abort()
+				return callback "downloadable content, aborted"
+
+			if contentLength and parseInt(contentLength, 10) > 10 * 1024 * 1024
+				theRequest.abort()
+				return callback "response size over 10M, aborted"
 
 	getMetaFromBuffer: (buffer, res, callback) =>
 		unless callback then callback = res

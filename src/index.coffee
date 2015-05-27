@@ -60,6 +60,10 @@ class OpenGraph
 			contentDisposition = res.headers['content-disposition']
 			contentLength = res.headers['content-length']
 
+			if res.statusCode >= 400
+				theRequest.abort()
+				return callback "status code #{res.statusCode}, aborted"
+
 			if contentDisposition and /^attachment/.test contentDisposition
 				theRequest.abort()
 				return callback "downloadable content, aborted"

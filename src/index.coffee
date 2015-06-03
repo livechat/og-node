@@ -58,7 +58,10 @@ class OpenGraph
 
 		theRequest.once 'response', openGraphResponseHandler = (res) ->
 			contentDisposition = res.headers['content-disposition']
+			contentType = res.headers['content-type'] || ''
 			contentLength = res.headers['content-length']
+
+			console.log res.headers
 
 			if res.statusCode >= 400
 				theRequest.abort()
@@ -67,6 +70,10 @@ class OpenGraph
 			if contentDisposition and /^attachment/.test contentDisposition
 				theRequest.abort()
 				return callback "downloadable content, aborted"
+
+			unless /text\/html/.test contentType.toLowerCase()
+				theRequest.abort()
+				return callback "bad content type, aborted"
 
 			if contentLength and parseInt(contentLength, 10) > 10 * 1024 * 1024
 				theRequest.abort()

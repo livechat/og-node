@@ -48,7 +48,7 @@ class OpenGraph
 		callback = _.once callback
 
 		theRequest = request.get _.extend({url: url}, @options), (err, res, body) =>
-			theRequest.removeAllListeners 'response'
+			theRequest.removeAllListeners 'response' if theRequest
 			if err then return callback err
 
 			if Buffer.isBuffer body

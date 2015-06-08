@@ -62,4 +62,17 @@ extractors =
 			else
 				next null
 
+	metaImage:
+		name: 'metaImage'
+		extract: ($, res, next) ->
+			#www.gogole.com
+			meta = $("meta")
+			img = null
+			for tag in meta
+				if tag.attribs.itemprop is 'image'
+					img = tag.attribs.content
+					break
+
+			next null, img
+
 module.exports = extractors

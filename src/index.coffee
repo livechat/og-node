@@ -61,8 +61,6 @@ class OpenGraph
 			contentType = res.headers['content-type'] || ''
 			contentLength = res.headers['content-length']
 
-			console.log res.headers
-
 			if res.statusCode >= 400
 				theRequest.abort()
 				return callback "status code #{res.statusCode}, aborted"

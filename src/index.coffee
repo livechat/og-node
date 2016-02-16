@@ -61,6 +61,7 @@ class OpenGraph
 		theRequest.once 'response', openGraphResponseHandler = (res) ->
 			contentDisposition = res.headers['content-disposition']
 			contentType = res.headers['content-type'] || ''
+			[contentType] = contentType.split ';'
 			contentLength = res.headers['content-length']
 
 			if res.statusCode >= 400

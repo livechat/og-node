@@ -5,6 +5,8 @@ iconv = require 'iconv-lite'
 async = require 'async'
 
 class OpenGraph
+	ALLOWED_CONTENT_TYPES = ['text/html', 'image/png', 'image/jpeg', 'image/jpg']
+
 	constructor: (options = {}) ->
 		@options = _.defaults options, 
 			parseFlat: true # set to false for experimental arrays parsing
@@ -59,6 +61,7 @@ class OpenGraph
 		theRequest.once 'response', openGraphResponseHandler = (res) ->
 			contentDisposition = res.headers['content-disposition']
 			contentType = res.headers['content-type'] || ''
+			[contentType] = contentType.split ';'
 			contentLength = res.headers['content-length']
 
 			if res.statusCode >= 400
@@ -69,7 +72,7 @@ class OpenGraph
 				theRequest.abort()
 				return callback "downloadable content, aborted"
 
-			unless /text\/html/.test contentType.toLowerCase()
+			if contentType.toLowerCase() not in ALLOWED_CONTENT_TYPES
 				theRequest.abort()
 				return callback "bad content type, aborted"
 

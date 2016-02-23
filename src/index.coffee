@@ -81,12 +81,16 @@ class OpenGraph
 		unless callback then callback = res
 
 		asciiHtml = buffer.toString 'ascii'
-		$ = cheerio.load asciiHtml
+		
+		$ = try cheerio.load asciiHtml catch e
+		if e then return callback e
 
 		encoding = try getEncoding res.headers['content-type']
 
 		unless encoding
-			metaTags = $('meta[http-equiv]')
+			metaTags = try $('meta[http-equiv]') catch e
+			if e then return callback e
+
 			for metaTag in metaTags
 				if metaTag.attribs['http-equiv'].toLowerCase() is 'content-type'
 					encoding = getEncoding metaTag.attribs.content
@@ -109,7 +113,8 @@ class OpenGraph
 			og: {}
 			custom: {}
 
-		$ = cheerio.load html
+		$ = try cheerio.load html catch e
+		if e then return callback e
 
 		# --- open graph ---
 		namespace = null
@@ -127,7 +132,8 @@ class OpenGraph
 		namespace ?= 'og'
 		namespace += ':'
 
-		metaTags = $("meta")
+		metaTags = try $("meta") catch e
+		if e then return callback e
 
 		for meta in metaTags
 			properties = _.pick meta.attribs, 'property', 'content'

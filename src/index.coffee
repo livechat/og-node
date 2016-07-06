@@ -3,6 +3,7 @@ _ = require 'underscore'
 request = require 'request'
 iconv = require 'iconv-lite'
 async = require 'async'
+u = require 'url'
 
 class OpenGraph
 	ALLOWED_CONTENT_TYPES = ['text/html', 'image/png', 'image/jpeg', 'image/jpg']
@@ -20,8 +21,38 @@ class OpenGraph
 				'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.104 Safari/537.36"
 			pool:
 				maxSockets: Infinity
+			onlyIanaTld: true
 
 		@extractors = []
+		@tlds = []
+
+		if @options.onlyIanaTld
+			async.whilst () => 
+					@tlds.length is 0				
+				, (cb) =>
+					request.get "http://data.iana.org/TLD/tlds-alpha-by-domain.txt", (err, res, data) =>
+						if err or res.statusCode isnt 200 then return setTimeout cb, 15 * 1000
+						console.log 'in'
+						try
+							lines = data.split("\n")
+							for line in lines
+								if line.length == 0
+									continue
+								if /^\t#/.test line
+									continue
+
+								@tlds.push line.toLowerCase()
+
+							cb null
+
+						catch e
+							setTimeout cb, 15 * 1000
+				, ->
+
+		if @options.followRedirect and @options.onlyIanaTld
+			@options.followRedirect = (request) =>
+				location = request.headers['location']
+				return @isTld location
 
 	registerExtractor: (extractor) ->
 		unless extractor and _.isString(extractor.name) and extractor.name.length and _.isFunction(extractor.extract)
@@ -46,8 +77,19 @@ class OpenGraph
 
 		return null
 
+	isTld: (url) =>
+		{hostname} = u.parse url
+		unless hostname then return false
+		tld = hostname.split(".").pop()
+
+		return tld in @tlds
+
 	getMetaFromUrl: (url, callback) =>
 		callback = _.once callback
+
+		if @options.onlyIanaTld
+			unless @isTld url
+				return callback "wrong uri"
 
 		theRequest = request.get _.extend({url: url}, @options), (err, res, body) =>
 			theRequest.removeAllListeners 'response' if theRequest

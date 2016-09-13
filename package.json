@@ -3,7 +3,7 @@
   "description": "Open graph parser with custom fallbacks.",
   "main": "lib/index.js",
   "license": "BSD",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "dependencies": {
     "async": "^0.9.0",
     "cheerio": "^0.20.0",

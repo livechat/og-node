@@ -9,7 +9,7 @@ class OpenGraph
 	ALLOWED_CONTENT_TYPES = ['text/html', 'image/png', 'image/jpeg', 'image/jpg']
 
 	constructor: (options = {}) ->
-		@options = _.defaults options, 
+		@options = _.defaults options,
 			parseFlat: true # set to false for experimental arrays parsing
 			encoding: null # use null for auto detection
 			followRedirect: true
@@ -27,12 +27,12 @@ class OpenGraph
 		@tlds = []
 
 		if @options.onlyIanaTld
-			async.whilst () => 
-					@tlds.length is 0				
+			async.whilst () =>
+					@tlds.length is 0
 				, (cb) =>
 					request.get "http://data.iana.org/TLD/tlds-alpha-by-domain.txt", (err, res, data) =>
 						if err or res.statusCode isnt 200 then return setTimeout cb, 15 * 1000
-						console.log 'in'
+
 						try
 							lines = data.split("\n")
 							for line in lines
@@ -126,7 +126,7 @@ class OpenGraph
 		unless callback then callback = res
 
 		asciiHtml = buffer.toString 'ascii'
-		
+
 		$ = try cheerio.load asciiHtml catch e
 		if e then return callback e
 
@@ -168,7 +168,7 @@ class OpenGraph
 
 		if html?.attribs
 			for attrName of html.attribs
-				attrValue = html.attribs[attrName] 
+				attrValue = html.attribs[attrName]
 
 				if attrValue.toLowerCase() is 'http://opengraphprotocol.org/schema/' and attrName.substring(0,6) is 'xmlns:'
 					namespace = attrName.substring(6)
@@ -193,7 +193,7 @@ class OpenGraph
 					parsed.og[property].push properties.content
 				else if parsed.og[property]
 					parsed.og[property] = [parsed.og[property], properties.content]
-				else 
+				else
 					parsed.og[property] = properties.content
 
 			else
@@ -203,7 +203,7 @@ class OpenGraph
 					if keys.length
 						if _.isString ref[key]
 							ref[key] = [__root: ref[key]]
-						else 
+						else
 							ref[key] ?= []
 					else
 						if _.isArray(ref) and not ref.length
@@ -235,7 +235,7 @@ class OpenGraph
 					if err then return next err
 					parsed.custom[extractor.name] = value if value
 					# setImmediate exits try scope
-					setImmediate -> next null	
+					setImmediate -> next null
 			catch e
 				setImmediate -> next "extractor #{extractor.name} thrown: #{e}"
 

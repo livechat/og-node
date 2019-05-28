@@ -83,4 +83,17 @@ extractors =
 
 			next null, img
 
+	livechat: 
+		name: "livechat"
+		extract: ($, res, next) ->
+			try
+				tags = {}
+				$('meta[name^="livechat:"]').each (i, tag) ->
+					attrName = $(this).attr('name').replace('livechat:', '') 
+					tags[attrName] = $(this).attr('content')
+			catch e
+				if e then return next null
+
+			next null, tags
+  		
 module.exports = extractors

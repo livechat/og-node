@@ -59,3 +59,16 @@ describe "extractor", ->
 			@og.getMetaFromHtml @imageHTML, (err, results) ->
 				results.custom.image.should.startWith "https://path.to/image.2.jpeg"
 				done null
+
+		it "should return livechat tags", (done) ->
+			@og.registerExtractor OpenGraph.extractors.livechat
+			@og.getMetaFromHtml @youtubeHTML, (err, results) ->
+				results.custom.livechat.should.have.property('title', 'Livechat title');
+				results.custom.livechat.should.have.property('subtitle', 'Livechat subtitle');
+				results.custom.livechat.should.have.property('image', 'https://www.livechatinc.com/wp-content/themes/livechat2.0/media/img/logo_small@2x.png?v=3');
+				results.custom.livechat.should.have.property('button', 'http://example.org');
+				results.custom.livechat.should.have.property('button:label', 'Run network test');
+				results.custom.livechat.should.have.property('button:type', 'moment');
+				results.custom.livechat.should.have.property('button:moment:icon', 'someicon.ico');
+				results.custom.livechat.should.have.property('button:moment:title', 'Moment title');
+				done null
